@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        table,th, td {
+            border: 1px solid;
+        border-style:solid;
+        border-color: #96D4D4;
+        }
+        </style>
+    <title>Consumir API Rest</title>
+</head>
+<body>
+
+
+    <h1>Formuario</h1>
+    <form>
+
+        <label for="name">Nombre</label>
+        <input type="text" name="nombre" id="nombre" />
+        <label for="email">Email</label>
+        <input type="email" name="email" id="email" />
+
+        <button type="submit">Submit</button>
+    </form>
+
+    <button onclick="mostrar()">Mostrar</button>
+    <!-- <p id="datos"></p> -->
+    <table id="datos"></table>
+
+    <script>
+        function mostrar(){
+            limpiar()
+            let contenido = document.querySelector('#datos')
+            contenido.innerHTML=`<tr> <th>id</th> <th>Nombre</th> <th>email</th> </tr>`
+            fetch('https://crud701.herokuapp.com/estudiantes')
+                .then(res => res.json())
+                .then(datos=>{
+                    console.log(datos)
+                    for (const valor of datos) {
+                        //contenido.innerHTML +=  `${valor.nombre} - ${valor.email} <br>`
+                        contenido.innerHTML +=  `<tr> <td>${valor._id}</td> <td>${valor.nombre}</td><td>${valor.email}</td>
+                            <td></td><td><button onclick="borrar('${valor._id}')">Borrar</button> </td>
+                        </tr>
+                        `
+                    }
+                })
+        }
+
+        function limpiar(){
+            let contenido = document.querySelector('#datos')
+            contenido.innerHTML='   '
+        }
+
+
+        //1 Esto es tomar los datos del formuario
+        const form = document.querySelector('form');
+        form.addEventListener('submit', handleSubmit);
+
+        function handleSubmit(event) {
+            event.preventDefault();
+            const data = new FormData(event.target);
+            guardar( Object.fromEntries(data.entries()))
+        }
+
+
+        
+        function guardar(value){
+            (async () => {
+
+                const rawResponse = await fetch('https://crud701.herokuapp.com/estudiantes', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(value)
+                });
+                const content = await rawResponse.json();
+                mostrar();
+                console.log(content);
+            })();
+        }
+
+        function borrar1(id){
+            alert(id)
+        }
+        function borrar(id){
+            (async () => {
+                const url = "https://crud701.herokuapp.com/estudiantes"+id
+                //console.log(url)
+                const rawResponse = await fetch(url, {
+                method: 'DELETE'
+                });
+                const content = await rawResponse.json();
+                alert('Estudiante borrado correctamente')
+                mostrar()
+                
+            })();
+        }
+    </script>
+</body>
+</html>
